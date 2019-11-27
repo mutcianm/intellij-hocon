@@ -9,15 +9,17 @@ val silencerVersion = "1.4.4"
 lazy val hocon = project.in(file("."))
   .enablePlugins(SbtIdeaPlugin)
   .dependsOn(hoconCore, hoconJava)
+  .settings(
+    patchPluginXml := pluginXmlOptions { xml =>
+      xml.version = version.value
+    }
+  )
 
 lazy val hoconCore = project.in(file("hocon-core"))
   .enablePlugins(SbtIdeaPlugin)
   .settings(commonSettings: _*)
   .settings(
-    intellijInternalPlugins := Seq("properties"),
-    patchPluginXml := pluginXmlOptions { xml =>
-      xml.version = version.value
-    }
+    intellijInternalPlugins := Seq("properties")
   )
 
 lazy val hoconJava = project.in(file("hocon-java"))
@@ -49,6 +51,7 @@ lazy val commonSettings = Seq(
   ideOutputDirectory in Compile := Some(baseDirectory.value / "out" / "production"),
   ideOutputDirectory in Test := Some(baseDirectory.value / "out" / "test"),
   libraryDependencies ++= Seq(
+    "org.apache.commons" % "commons-lang3" % "3.9",
     "com.novocode" % "junit-interface" % junitInterfaceVersion % Test,
     "com.github.ghik" % "silencer-lib" % silencerVersion % Provided cross CrossVersion.full,
     compilerPlugin("com.github.ghik" % "silencer-plugin" % silencerVersion cross CrossVersion.full),

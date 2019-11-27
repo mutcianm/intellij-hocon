@@ -20,13 +20,14 @@ class HoconPropertiesReferenceProvider extends PsiReferenceProvider {
     if (!isEnabled(element.getProject)) PsiReference.EMPTY_ARRAY
     else {
       val res = for {
-        lit <- element.opt.collectOnly[PsiLiteral]
+        lit <- element.opt.collectOnly[PsiLiteralValue]
+        psiLit <- element.opt.collectOnly[PsiElement]
         strValue <- lit.getValue.opt.collectOnly[String]
         hpath <- HoconPsiElementFactory.createPath(strValue, PsiManager.getInstance(element.getProject)).opt
         strPath <- hpath.fullStringPath
       } yield {
-        val text = lit.getText
-        val fullRange = ElementManipulators.getValueTextRange(lit)
+        val text = psiLit.getText
+        val fullRange = ElementManipulators.getValueTextRange(psiLit)
 
         def makeRefs(off: Int, keys: List[String]): List[HoconPropertyReference] = keys match {
           case Nil => Nil
@@ -47,7 +48,7 @@ class HoconPropertiesReferenceProvider extends PsiReferenceProvider {
             val nextRef = subRefs.headOption
             val revIndex = nextRef.fold(0)(_.reverseIndex + 1)
             val keyRange = new TextRange(off, endOffset)
-            val ref = new HoconPropertyReference(strPath, revIndex, key, lit, keyRange)
+            val ref = new HoconPropertyReference(strPath, revIndex, key, psiLit, keyRange)
             ref :: subRefs
         }
 
@@ -61,7 +62,7 @@ class HoconPropertyReference(
   fullPath: List[String],
   val reverseIndex: Int,
   key: String,
-  lit: PsiLiteral,
+  lit: PsiElement,
   range: TextRange
 ) extends PsiReference {
   def getCanonicalText: String = key

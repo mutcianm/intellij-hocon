@@ -3,6 +3,7 @@ package ref
 
 import java.{util => ju}
 
+import com.intellij.openapi.extensions.Extensions
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots._
 import com.intellij.openapi.util.{Condition, TextRange}
@@ -70,11 +71,18 @@ object IncludedFileReferenceSet {
   }
 
   def classpathPackageDirs(project: Project, scope: GlobalSearchScope, pkgName: String): List[PsiFileSystemItem] = {
-    val psiManager = PsiManager.getInstance(project)
-    PackageIndex.getInstance(project).getDirectoriesByPackageName(pkgName, false).iterator
-      .filter(scope.contains).flatMap(dir => Option(psiManager.findDirectory(dir)))
-      .toList
+
+    val ep = Extensions.getRootArea.getExtensionPoint[ClasspathPackageDirsProvider]("org.jetbrains.plugins.hocon.hoconPackageIndex")
+
+    if (ep.hasAnyExtensions)
+      ep.getExtensions.head.classpathPackageDirs(project, scope, pkgName)
+    else
+      Nil
   }
+}
+
+trait ClasspathPackageDirsProvider {
+  def classpathPackageDirs(project: Project, scope: GlobalSearchScope, pkgName: String): List[PsiFileSystemItem]
 }
 
 class IncludedFileReferenceSet(

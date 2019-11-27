@@ -62,7 +62,6 @@
                                  implementationClass="org.jetbrains.plugins.hocon.manipulators.HStringManipulator"/>
         <lang.elementManipulator forClass="org.jetbrains.plugins.hocon.psi.HKey"
                                  implementationClass="org.jetbrains.plugins.hocon.manipulators.HKeyManipulator"/>
-        <psi.referenceContributor implementation="org.jetbrains.plugins.hocon.ref.HoconReferenceContributor"/>
         <qualifiedNameProvider implementation="org.jetbrains.plugins.hocon.ref.HoconQualifiedNameProvider"/>
 
         <projectService serviceInterface="org.jetbrains.plugins.hocon.settings.HoconProjectSettings"
@@ -112,4 +111,9 @@
                 description="Navigates to the previous definition of a property in a HOCON file"
                 use-shortcut-of="GotoSuperMethod"/>
     </actions>
+
+    <extensionPoints>
+        <extensionPoint name="hoconPackageIndex" interface="org.jetbrains.plugins.hocon.ref.ClasspathPackageDirsProvider"/>
+    </extensionPoints>
+
 </idea-plugin>
